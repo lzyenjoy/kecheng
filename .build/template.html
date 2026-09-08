@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026 秋季学期课表 · 药理学</title>
+<style>
+:root {
+  color-scheme: light;
+  --surface-1: #fcfcfb; --page: #f9f9f7;
+  --ink-1: #0b0b0b; --ink-2: #52514e; --ink-3: #898781;
+  --grid: #e1e0d9; --baseline: #c3c2b7; --ring: rgba(11,11,11,0.10);
+  --cat-politics: #2a78d6; --cat-lang: #eb6834; --cat-med: #1baf7a;
+  --cat-core: #eda100; --cat-other: #e87ba4;
+  --holiday-wash: rgba(250,178,25,0.16); --today-badge: #0b0b0b;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-1: #1a1a19; --page: #0d0d0d;
+  --ink-1: #ffffff; --ink-2: #c3c2b7; --ink-3: #898781;
+  --grid: #2c2c2a; --baseline: #383835; --ring: rgba(255,255,255,0.10);
+  --cat-politics: #3987e5; --cat-lang: #d95926; --cat-med: #199e70;
+  --cat-core: #c98500; --cat-other: #d55181;
+  --holiday-wash: rgba(250,178,25,0.13); --today-badge: #ffffff;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --surface-1: #1a1a19; --page: #0d0d0d;
+    --ink-1: #ffffff; --ink-2: #c3c2b7; --ink-3: #898781;
+    --grid: #2c2c2a; --baseline: #383835; --ring: rgba(255,255,255,0.10);
+    --cat-politics: #3987e5; --cat-lang: #d95926; --cat-med: #199e70;
+    --cat-core: #c98500; --cat-other: #d55181;
+    --holiday-wash: rgba(250,178,25,0.13); --today-badge: #ffffff;
+  }
+}
+* { box-sizing: border-box; margin: 0; }
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+  background: var(--page); color: var(--ink-1); padding: 20px clamp(12px, 3vw, 32px) 48px;
+}
+.wrap { max-width: 1280px; margin: 0 auto; }
+h1 { font-size: 20px; font-weight: 650; letter-spacing: 0.2px; }
+.sub { color: var(--ink-2); font-size: 13px; margin-top: 4px; line-height: 1.6; }
+.sub b { color: var(--ink-1); font-weight: 600; }
+
+/* toolbar */
+.toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 16px 0 10px; }
+.tbtn {
+  font: inherit; font-size: 13px; color: var(--ink-2); background: var(--surface-1);
+  border: 1px solid var(--ring); border-radius: 8px; padding: 6px 12px; cursor: pointer;
+}
+.tbtn:hover { color: var(--ink-1); }
+.tbtn[aria-pressed="true"] { color: var(--ink-1); border-color: var(--baseline); font-weight: 600; box-shadow: inset 0 -2px 0 var(--ink-1); }
+.month-title { font-size: 16px; font-weight: 650; min-width: 130px; text-align: center; font-variant-numeric: tabular-nums; }
+.spacer { flex: 1; }
+
+/* legend / filters */
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; padding: 10px 12px;
+  background: var(--surface-1); border: 1px solid var(--ring); border-radius: 10px; margin-bottom: 14px; }
+.leg-group { display: flex; align-items: center; gap: 6px; }
+.leg-dot { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.leg-cat { font-size: 12px; font-weight: 650; color: var(--ink-2); }
+.leg-sep { width: 1px; height: 16px; background: var(--grid); }
+.course-chip {
+  font: inherit; font-size: 12px; color: var(--ink-2); background: none; border: 1px solid transparent;
+  border-radius: 999px; padding: 3px 10px 3px 7px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+}
+.course-chip:hover { background: var(--page); color: var(--ink-1); }
+.course-chip .leg-dot { width: 8px; height: 8px; }
+.course-chip[aria-pressed="false"] { opacity: 0.38; text-decoration: line-through; }
+.filter-hint { font-size: 12px; color: var(--ink-3); }
+
+/* month grid */
+.grid { display: grid; grid-template-columns: 56px repeat(7, minmax(0, 1fr)); gap: 1px; background: var(--grid);
+  border: 1px solid var(--grid); border-radius: 10px; overflow: hidden; }
+.grid .hd { background: var(--surface-1); padding: 8px 6px; text-align: center; font-size: 12px; font-weight: 650; color: var(--ink-2); }
+.grid .hd.we { color: var(--ink-3); }
+.gutter { background: var(--surface-1); padding: 8px 4px; text-align: center; font-size: 10.5px; line-height: 1.5; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.gutter b { display: block; color: var(--ink-2); font-weight: 650; }
+.cell { background: var(--surface-1); min-width: 0; min-height: 108px; padding: 6px; display: flex; flex-direction: column; gap: 2px; }
+.cell.we { background: color-mix(in srgb, var(--ink-1) 3%, var(--surface-1)); }
+.cell.out { background: var(--page); }
+.cell.out .dnum { color: var(--baseline); }
+.cell.holiday { background: var(--holiday-wash); }
+.dnum { font-size: 12px; font-variant-numeric: tabular-nums; color: var(--ink-2); padding: 1px 6px; border-radius: 999px; align-self: flex-start; font-weight: 600; }
+.cell.today .dnum { background: var(--today-badge); color: var(--surface-1); }
+.hol-tag { font-size: 10px; color: var(--ink-2); border: 1px solid var(--ring); border-radius: 999px; padding: 1px 6px; align-self: flex-start; }
+.evt {
+  font: inherit; text-align: left; font-size: 11px; line-height: 1.35; cursor: pointer;
+  border: none; border-left: 3px solid var(--cat); border-radius: 4px; padding: 2px 5px;
+  background: color-mix(in srgb, var(--cat) 13%, var(--surface-1));
+  color: var(--ink-1); display: block; width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+}
+.evt:hover, .evt:focus-visible { background: color-mix(in srgb, var(--cat) 24%, var(--surface-1)); }
+.evt .tm { color: var(--ink-2); font-variant-numeric: tabular-nums; margin-right: 3px; font-size: 10px; }
+
+/* agenda */
+.agenda { display: none; flex-direction: column; gap: 1px; background: var(--grid); border: 1px solid var(--grid); border-radius: 10px; overflow: hidden; }
+.agenda.show { display: flex; }
+.ag-day { background: var(--surface-1); padding: 10px 14px; display: flex; gap: 14px; }
+.ag-date { flex: none; width: 118px; }
+.ag-date .d1 { font-weight: 650; font-size: 14px; font-variant-numeric: tabular-nums; }
+.ag-date .d2 { font-size: 11px; color: var(--ink-3); margin-top: 2px; }
+.ag-evts { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.ag-evt { display: flex; align-items: baseline; gap: 8px; font-size: 13px; }
+.ag-evt .leg-dot { position: relative; top: 1px; }
+.ag-evt .tm { color: var(--ink-2); font-variant-numeric: tabular-nums; font-size: 12px; flex: none; width: 96px; }
+.ag-evt .meta { color: var(--ink-3); font-size: 12px; }
+.ag-evt .wk { margin-left: auto; color: var(--ink-3); font-size: 11px; flex: none; }
+.ag-hol { font-size: 11px; color: var(--ink-2); }
+.empty-day { color: var(--baseline); font-size: 12px; }
+
+/* modal */
+.backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.35); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 50; }
+.backdrop.show { display: flex; }
+.modal { background: var(--surface-1); border: 1px solid var(--ring); border-radius: 14px; width: min(520px, 100%);
+  max-height: 82vh; overflow: auto; padding: 18px 20px; }
+.modal h2 { font-size: 16px; font-variant-numeric: tabular-nums; }
+.modal .m-sub { font-size: 12px; color: var(--ink-3); margin: 4px 0 12px; }
+.m-evt { display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid var(--grid); font-size: 13px; }
+.m-evt .tm { flex: none; width: 96px; color: var(--ink-2); font-variant-numeric: tabular-nums; font-size: 12px; }
+.m-evt .meta { color: var(--ink-3); font-size: 12px; margin-top: 2px; }
+.m-close { margin-top: 14px; float: right; }
+
+/* tooltip */
+#tip { position: fixed; z-index: 60; pointer-events: none; background: var(--surface-1); border: 1px solid var(--ring);
+  border-radius: 8px; padding: 8px 10px; font-size: 12px; line-height: 1.6; color: var(--ink-1);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.14); display: none; max-width: 280px; }
+#tip .t1 { font-weight: 650; }
+#tip .t2 { color: var(--ink-2); }
+
+.foot { margin-top: 14px; font-size: 12px; color: var(--ink-3); line-height: 1.7; }
+@media (max-width: 640px) {
+  .grid { grid-template-columns: 34px repeat(7, minmax(0, 1fr)); }
+  .gutter { font-size: 9px; padding: 6px 2px; }
+  .evt { font-size: 9px; padding: 1px 3px; border-left-width: 2px; }
+  .evt .tm { display: none; }
+  .ag-date { width: 84px; }
+  .ag-evt { flex-wrap: wrap; }
+  .ag-evt .wk { display: none; }
+}
+@media print { .toolbar, .legend, .foot { display: none; } .cell { min-height: 80px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>2026 秋季学期课表 <span style="font-weight:400;color:var(--ink-3)">· 药理学</span></h1>
+  <p class="sub">周次锚点：2026-09-07 当周 = <b>公共课第 1 周 = 专业课第 2 周</b>（专业课周次 = 公共课周次 + 1）。学期范围 9/7 ~ 2027/1/10，共 <b id="stat"></b>。</p>
+
+  <div class="toolbar">
+    <button class="tbtn" id="prev" aria-label="上一月">‹</button>
+    <span class="month-title" id="mtitle"></span>
+    <button class="tbtn" id="next" aria-label="下一月">›</button>
+    <button class="tbtn" id="today">今天</button>
+    <span class="spacer"></span>
+    <button class="tbtn" id="v-cal" aria-pressed="true">月历</button>
+    <button class="tbtn" id="v-agn" aria-pressed="false">列表</button>
+    <button class="tbtn" id="theme" aria-label="切换深浅色">☾ / ☀</button>
+  </div>
+
+  <div class="legend" id="legend"></div>
+
+  <div class="grid" id="cal" role="grid" aria-label="月历课表"></div>
+  <div class="agenda" id="agenda"></div>
+
+  <p class="foot">数据来自 class.doc（15 行 × 9 列课表，纵向合并单元格已还原）。中秋节（9/25）、国庆节（10/1–10/7）、元旦（1/1）按 2026 年法定假期标注，仅供提示——<b>是否停课/调课以学校通知为准</b>。点击任意日期查看当天详情；点击图例中的课程名可隐藏/显示该课。</p>
+</div>
+
+<div class="backdrop" id="bk"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="mtitle2">
+  <h2 id="mtitle2"></h2><div class="m-sub" id="msub"></div><div id="mlist"></div>
+  <button class="tbtn m-close" id="mclose">关闭</button>
+</div></div>
+<div id="tip"></div>
+
+<script>
+const DATA = __DATA__;
+const CAT_COLOR = { politics: "var(--cat-politics)", lang: "var(--cat-lang)", med: "var(--cat-med)", core: "var(--cat-core)", other: "var(--cat-other)" };
+const CAT_NAME = {}; for (const k in DATA.cats) CAT_NAME[k] = DATA.cats[k].name;
+const EV = DATA.events, HOL = DATA.holidays;
+const DOW = ["一","二","三","四","五","六","日"];
+const MIN_M = [2026, 9], MAX_M = [2027, 1];
+const hidden = new Set();
+let cur = initialMonth(), view = "cal";
+
+function iso(d) { return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0"); }
+function pd(s) { const [y,m,dd] = s.split("-").map(Number); return new Date(y, m-1, dd); }
+function monday(d) { const x = new Date(d); x.setDate(d.getDate() - ((d.getDay()+6)%7)); return x; }
+const WEEK1 = pd("2026-09-07");
+function pubWeek(d) { return Math.floor((monday(d) - WEEK1) / 6048e5) + 1; }
+function todayISO() { const n = new Date(); return iso(n); }
+
+function initialMonth() {
+  const t = new Date();
+  const y = t.getFullYear(), m = t.getMonth() + 1;
+  const key = y * 12 + m;
+  if (key < MIN_M[0]*12 + MIN_M[1]) return [...MIN_M];
+  if (key > MAX_M[0]*12 + MAX_M[1]) return [...MAX_M];
+  return [y, m];
+}
+function holidayOf(ds) { for (const h of HOL) if (ds >= h.start && ds <= h.end) return h.name; return null; }
+function byDate() {
+  const map = {};
+  for (const e of EV) { (map[e.date] = map[e.date] || []).push(e); }
+  for (const k in map) map[k].sort((a,b) => a.start < b.start ? -1 : 1);
+  return map;
+}
+const BD = byDate();
+const byCourse = {};
+for (const e of EV) byCourse[e.course] = e;
+
+// ---- legend ----
+(function buildLegend() {
+  const lg = document.getElementById("legend");
+  let first = true;
+  for (const k in DATA.cats) {
+    if (!first) { const s = document.createElement("span"); s.className = "leg-sep"; lg.appendChild(s); }
+    first = false;
+    const g = document.createElement("span"); g.className = "leg-group";
+    const dot = document.createElement("span"); dot.className = "leg-dot"; dot.style.background = CAT_COLOR[k];
+    const nm = document.createElement("span"); nm.className = "leg-cat"; nm.textContent = CAT_NAME[k];
+    g.append(dot, nm);
+    for (const c of DATA.cats[k].courses) {
+      const b = document.createElement("button"); b.className = "course-chip"; b.setAttribute("aria-pressed", "true");
+      b.dataset.course = c;
+      const d2 = document.createElement("span"); d2.className = "leg-dot"; d2.style.background = CAT_COLOR[k];
+      b.append(d2, document.createTextNode(c));
+      b.onclick = () => { toggleCourse(c); };
+      g.appendChild(b);
+    }
+    lg.appendChild(g);
+  }
+  const hint = document.createElement("span"); hint.className = "filter-hint"; hint.textContent = "点击课程名可隐藏";
+  lg.appendChild(hint);
+})();
+function toggleCourse(c) {
+  if (hidden.has(c)) hidden.delete(c); else hidden.add(c);
+  document.querySelectorAll(".course-chip").forEach(b => {
+    if (b.dataset.course === c) b.setAttribute("aria-pressed", hidden.has(c) ? "false" : "true");
+  });
+  render();
+}
+
+// ---- month grid ----
+function renderCal() {
+  const [y, m] = cur;
+  const first = new Date(y, m-1, 1);
+  const start = monday(first);
+  const el = document.getElementById("cal");
+  el.innerHTML = "";
+  const tISO = todayISO();
+  const hd = document.createElement("div"); hd.className = "hd"; hd.textContent = "周";
+  el.appendChild(hd);
+  DOW.forEach((d, i) => { const h = document.createElement("div"); h.className = "hd" + (i > 4 ? " we" : ""); h.textContent = d; el.appendChild(h); });
+  for (let w = 0; w < 6; w++) {
+    const rowStart = new Date(start); rowStart.setDate(start.getDate() + w*7);
+    if (new Date(rowStart.getFullYear(), rowStart.getMonth(), 1) > new Date(y, m, 0)) break;
+    const g = document.createElement("div"); g.className = "gutter";
+    const pw = pubWeek(rowStart);
+    g.innerHTML = pw >= 1 ? `<b>公${pw}</b>专${pw+1}` : "—";
+    el.appendChild(g);
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(rowStart); d.setDate(rowStart.getDate() + i);
+      const ds = iso(d);
+      const cell = document.createElement("div");
+      cell.className = "cell" + (i > 4 ? " we" : "") + (d.getMonth() !== m-1 ? " out" : "") + (ds === tISO ? " today" : "");
+      const hol = holidayOf(ds);
+      if (hol) cell.classList.add("holiday");
+      const dn = document.createElement("span"); dn.className = "dnum"; dn.textContent = d.getDate();
+      cell.appendChild(dn);
+      if (hol) { const t = document.createElement("span"); t.className = "hol-tag"; t.textContent = hol; cell.appendChild(t); }
+      for (const e of (BD[ds] || [])) {
+        if (hidden.has(e.course)) continue;
+        const b = document.createElement("button"); b.className = "evt"; b.style.setProperty("--cat", CAT_COLOR[e.cat]);
+        b.innerHTML = `<span class="tm">${e.start}</span>${e.short}`;
+        b.setAttribute("aria-label", `${ds} ${e.start}-${e.end} ${e.course}，${e.teacher}，${e.room}，${e.weeks}`);
+        attachTip(b, e);
+        b.onclick = (ev) => { ev.stopPropagation(); openDay(ds); };
+        cell.appendChild(b);
+      }
+      cell.onclick = () => openDay(ds);
+      el.appendChild(cell);
+    }
+  }
+  document.getElementById("mtitle").textContent = `${y}年${m}月`;
+}
+
+// ---- agenda ----
+function renderAgenda() {
+  const el = document.getElementById("agenda");
+  el.innerHTML = "";
+  const tISO = todayISO();
+  const dates = Object.keys(BD).sort();
+  let shown = 0;
+  for (const ds of dates) {
+    if (ds < "2026-09-07") continue;
+    const evts = BD[ds].filter(e => !hidden.has(e.course));
+    if (!evts.length && hidden.size === 0) {} // still render
+    if (hidden.size > 0 && !evts.length) continue;
+    shown++;
+    const day = document.createElement("div"); day.className = "ag-day" ;
+    const dt = pd(ds);
+    const hol = holidayOf(ds);
+    const left = document.createElement("div"); left.className = "ag-date";
+    const wd = DOW[(dt.getDay()+6)%7];
+    left.innerHTML = `<div class="d1">${ds.replace(/-/g,"/").slice(5)} 周${wd}${ds===tISO?' <span style="color:var(--ink-3)">·今天</span>':''}</div>`
+      + `<div class="d2">公共周${pubWeek(dt)} · 专业周${pubWeek(dt)+1}</div>`
+      + (hol ? `<div class="ag-hol">${hol}（法定假）</div>` : "");
+    const right = document.createElement("div"); right.className = "ag-evts";
+    if (!evts.length) { right.innerHTML = `<span class="empty-day">无课</span>`; }
+    for (const e of evts) {
+      const r = document.createElement("div"); r.className = "ag-evt";
+      const dot = document.createElement("span"); dot.className = "leg-dot"; dot.style.background = CAT_COLOR[e.cat];
+      r.innerHTML = `<span class="tm">${e.start}–${e.end}</span>`;
+      r.appendChild(dot);
+      r.insertAdjacentText("beforeend", e.course);
+      const meta = document.createElement("span"); meta.className = "meta"; meta.textContent = `${e.teacher} · ${e.room}`;
+      const wk = document.createElement("span"); wk.className = "wk"; wk.textContent = e.weeks;
+      r.append(meta, wk);
+      right.appendChild(r);
+    }
+    day.append(left, right);
+    el.appendChild(day);
+  }
+  if (!shown) { el.innerHTML = `<div class="ag-day"><div class="empty-day">没有匹配的课程</div></div>`; }
+}
+
+// ---- modal ----
+function openDay(ds) {
+  const dt = pd(ds);
+  document.getElementById("mtitle2").textContent = ds.replace(/-/g,"/") + " 周" + DOW[(dt.getDay()+6)%7];
+  const hol = holidayOf(ds);
+  document.getElementById("msub").textContent =
+    `公共第${pubWeek(dt)}周 · 专业第${pubWeek(dt)+1}周` + (hol ? ` · ${hol}（法定假期，是否调课以学校通知为准）` : "");
+  const list = document.getElementById("mlist"); list.innerHTML = "";
+  const evts = (BD[ds] || []).filter(e => !hidden.has(e.course));
+  if (!evts.length) list.innerHTML = `<div class="empty-day">当天无课</div>`;
+  for (const e of evts) {
+    const r = document.createElement("div"); r.className = "m-evt";
+    r.innerHTML = `<span class="tm">${e.start}–${e.end}</span>`;
+    const box = document.createElement("div");
+    const dot = document.createElement("span"); dot.className = "leg-dot"; dot.style.background = CAT_COLOR[e.cat];
+    dot.style.display = "inline-block"; dot.style.marginRight = "6px";
+    box.appendChild(dot); box.insertAdjacentText("beforeend", e.course);
+    const meta = document.createElement("div"); meta.className = "meta";
+    meta.textContent = `${e.teacher} · ${e.room} · ${e.track} · ${e.weeks}`;
+    box.appendChild(meta); r.appendChild(box); list.appendChild(r);
+  }
+  document.getElementById("bk").classList.add("show");
+  document.getElementById("mclose").focus();
+}
+document.getElementById("mclose").onclick = () => document.getElementById("bk").classList.remove("show");
+document.getElementById("bk").onclick = (e) => { if (e.target.id === "bk") document.getElementById("bk").classList.remove("show"); };
+document.addEventListener("keydown", e => { if (e.key === "Escape") document.getElementById("bk").classList.remove("show"); });
+
+// ---- tooltip ----
+const tip = document.getElementById("tip");
+function attachTip(el, e) {
+  const show = () => {
+    tip.innerHTML = `<div class="t1">${e.course}</div><div class="t2">${e.start}–${e.end}<br>${e.teacher} · ${e.room}<br>${e.track} · ${e.weeks}</div>`;
+    tip.style.display = "block"; move(event);
+  };
+  const move = (ev) => {
+    if (tip.style.display !== "block") return;
+    const x = Math.min(ev.clientX + 14, innerWidth - 292), y = Math.min(ev.clientY + 14, innerHeight - 120);
+    tip.style.left = x + "px"; tip.style.top = y + "px";
+  };
+  const hide = () => { tip.style.display = "none"; };
+  el.addEventListener("mouseenter", show); el.addEventListener("mousemove", move);
+  el.addEventListener("mouseleave", hide); el.addEventListener("blur", hide);
+}
+addEventListener("scroll", hide, true); function hide() { tip.style.display = "none"; }
+
+// ---- controls ----
+function shiftMonth(n) {
+  let k = cur[0]*12 + cur[1] + n;
+  const lo = MIN_M[0]*12 + MIN_M[1], hi = MAX_M[0]*12 + MAX_M[1];
+  if (k < lo) k = lo; if (k > hi) k = hi;
+  cur = [Math.floor(k/12), k%12];
+  render();
+}
+document.getElementById("prev").onclick = () => shiftMonth(-1);
+document.getElementById("next").onclick = () => shiftMonth(1);
+document.getElementById("today").onclick = () => { cur = initialMonth(); render(); };
+document.getElementById("v-cal").onclick = () => setView("cal");
+document.getElementById("v-agn").onclick = () => setView("agn");
+function setView(v) {
+  view = v;
+  document.getElementById("v-cal").setAttribute("aria-pressed", v === "cal");
+  document.getElementById("v-agn").setAttribute("aria-pressed", v === "agn");
+  render();
+}
+document.getElementById("theme").onclick = () => {
+  const r = document.documentElement;
+  const dark = r.dataset.theme === "dark" || (!r.dataset.theme && matchMedia("(prefers-color-scheme: dark)").matches);
+  r.dataset.theme = dark ? "light" : "dark";
+  try { localStorage.setItem("kb-theme", r.dataset.theme); } catch (e) {}
+};
+try { const t = localStorage.getItem("kb-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+
+// ---- stats & render ----
+(function stats() {
+  const courses = new Set(EV.map(e => e.course)).size;
+  document.getElementById("stat").textContent = `${courses} 门课 · ${EV.length} 次课`;
+})();
+function render() {
+  document.getElementById("cal").style.display = view === "cal" ? "grid" : "none";
+  document.getElementById("agenda").classList.toggle("show", view === "agn");
+  if (view === "cal") renderCal(); else renderAgenda();
+}
+render();
+</script>
+</body>
+</html>
