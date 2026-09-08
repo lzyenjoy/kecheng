@@ -37,7 +37,8 @@ RULES = [
     ("现代生物医学前沿",   "med",      1, "08:30", "11:50", [(10, 18, "曾梅")],  "德启-西101", "pub"),
     ("药理学选论",         "core",     0, "08:30", "11:50", [(2, 8, "胥正敏")],          "科技楼17楼药物研究所会议室", "prof"),
     ("药理学选论",         "core",     0, "08:30", "11:50", [(9, 9, "李勇")],            "科技楼17楼药物研究所会议室", "prof"),
-    ("药理学选论",         "core",     4, "14:00", "17:20", [(2, 9, "胥正敏")],          "科技楼17楼药物研究所会议室", "prof"),
+    ("药理学选论",         "core",     4, "14:00", "17:20", [(2, 8, "胥正敏")],          "科技楼17楼药物研究所会议室", "prof"),
+    ("药理学选论",         "core",     4, "14:00", "15:30", [(9, 9, "胥正敏")],          "科技楼17楼药物研究所会议室", "prof"),
     ("药理学实验方法",     "core",     4, "08:30", "11:50", [(9, 17, "于春雷")],         "松林书院2号楼南408", "prof"),
     ("药学研究进展",       "core",     3, "14:00", "16:30", [(2, 15, "张帆")],           "松林书院2号楼南106", "prof"),
     ("体内药物分析",       "core",     2, "14:50", "17:20", [(2, 4, "苏蓉川"), (5, 5, "魏莹"), (7, 8, "魏莹")], "松林书院2号楼南309", "prof"),
@@ -99,3 +100,11 @@ json.dumps  # noqa
 open("/home/alex/project/kecheng/.build/events.json", "w", encoding="utf-8").write(
     json.dumps({"events": events, "holidays": HOLIDAYS, "cats": CATS}, ensure_ascii=False))
 print("\nwritten events.json")
+
+# ---- 组装自包含 HTML（数据内嵌）----
+data = json.dumps({"events": events, "holidays": HOLIDAYS, "cats": CATS}, ensure_ascii=False)
+data = data.replace("</", "<\\/")   # 防止内容提前闭合 <script>
+tpl = open("/home/alex/project/kecheng/.build/template.html", encoding="utf-8").read()
+out = tpl.replace("__DATA__", data)
+open("/home/alex/project/kecheng/calendar.html", "w", encoding="utf-8").write(out)
+print("written calendar.html (%d bytes)" % len(out))
