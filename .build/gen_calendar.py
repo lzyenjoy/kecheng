@@ -106,5 +106,5 @@ data = json.dumps({"events": events, "holidays": HOLIDAYS, "cats": CATS}, ensure
 data = data.replace("</", "<\\/")   # 防止内容提前闭合 <script>
 tpl = open("/home/alex/project/kecheng/.build/template.html", encoding="utf-8").read()
 out = tpl.replace("__DATA__", data)
-open("/home/alex/project/kecheng/calendar.html", "w", encoding="utf-8").write(out)
-print("written calendar.html (%d bytes)" % len(out))
+open("/home/alex/project/kecheng/index.html", "w", encoding="utf-8").write(out)
+print("written index.html (%d bytes)" % len(out))
